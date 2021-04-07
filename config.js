@@ -3,7 +3,9 @@ export const config = {
 	  username: "Username"
 	  password: "Bruh"
 	},
-	discordServerID: "Bruhland",
-	token: ""
+	discord: {
+	  serverId: "Bruhland",
+	  token: ""
+	}
 }
 

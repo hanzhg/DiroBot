@@ -1,19 +1,24 @@
-const Discord = require('discord.js');
-const nodemailer = require("nodemailer");
 const fs = require("fs");
+
+const nodemailer = require("nodemailer");
+const Discord = require('discord.js');
+
+const config = require('./config')
 
 const client = new Discord.Client();
 
-var emails = fs.readFileSync("./emails.txt", "utf-8");
+const emails = fs.readFileSync("./emails.txt", "utf-8");
 
 var dataID = {};
 
 // config
-var sender = "example@gmail.com";
-var password = "*****";
-var serverID = "";
-var token = "";
+var sender = config.nodemailer.username;
+var password = config.nodemailer.password;
+var serverID = config.discord.serverId;
+var token = config.discord.token;
 
+
+// nodemailer setup
 var smtpTransport = nodemailer.createTransport({
     service: "Gmail",
     auth: {
@@ -33,7 +38,7 @@ client.on('message', msg => {
         case "!v":
             if (message.length > 1) {
                 if (emails.includes(message[1])) {
-                    var uniqueID = Math.round(Math.random() * 999999);
+                    var uniqueID = uuid;
 
                     dataID[uniqueID] = [userID, message[1]];
 
