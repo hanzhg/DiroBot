@@ -1,6 +1,6 @@
 export const config = {
 	nodemailer: {
-	  username: "Username"
+	  username: "Username",
 	  password: "Bruh"
 	},
 	discord: {
