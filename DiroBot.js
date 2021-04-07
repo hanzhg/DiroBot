@@ -4,8 +4,8 @@ const nodemailer = require("nodemailer");
 const Discord = require('discord.js');
 
 const config = require('./config')
-
 const client = new Discord.Client();
+const { v4 as uuidv4 } = require('uuid')
 
 const emails = fs.readFileSync("./emails.txt", "utf-8");
 
@@ -38,7 +38,7 @@ client.on('message', msg => {
         case "!v":
             if (message.length > 1) {
                 if (emails.includes(message[1])) {
-                    var uniqueID = uuid;
+                    var uniqueID = uuidv4();
 
                     dataID[uniqueID] = [userID, message[1]];
 
