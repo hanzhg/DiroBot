@@ -1,0 +1,11 @@
+{
+    "nodemailer": {
+        "username": "Username",
+        "password": "Password"
+    },
+    "discord": {
+        "serverID": "ServerID",
+        "token": "Token",
+        "role": "Role"
+    }
+}
