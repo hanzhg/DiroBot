@@ -1,24 +1,23 @@
+var fs = require("fs");
+
 const Discord = require('discord.js');
 const nodemailer = require("nodemailer");
-const fs = require("fs");
-
 const client = new Discord.Client();
+const {
+    v4: uuidv4
+} = require('uuid');
 
-var emails = fs.readFileSync("./emails.txt", "utf-8");
+const emails = fs.readFileSync("./emails.txt", "utf-8").split("\r\n");
 
 var dataID = {};
 
-// config
-var sender = "example@gmail.com";
-var password = "*****";
-var serverID = "";
-var token = "";
+var config = JSON.parse(fs.readFileSync("config.json"));
 
 var smtpTransport = nodemailer.createTransport({
     service: "Gmail",
     auth: {
-        user: sender,
-        pass: password
+        user: config.nodemailer.username,
+        pass: config.nodemailer.password,
     }
 });
 
@@ -33,15 +32,15 @@ client.on('message', msg => {
         case "!v":
             if (message.length > 1) {
                 if (emails.includes(message[1])) {
-                    var uniqueID = Math.round(Math.random() * 999999);
+                    var uniqueID = uuidv4();
 
                     dataID[uniqueID] = [userID, message[1]];
 
                     var mailOptions = {
-                        from: sender,
+                        from: config.nodemailer.username,
                         to: message[1],
                         subject: "Code d'accès",
-                        html: "<h2>Voici votre code d'accès : " + uniqueID + "</h2>"
+                        html: "Voici votre code d'accès : " + uniqueID
                     };
 
                     smtpTransport.sendMail(mailOptions, function (err, info) {
@@ -52,24 +51,32 @@ client.on('message', msg => {
                     });
 
                     msg.channel.send("Le code d'accès à été envoyé").then(msg1 => {
-                            msg1.delete({
-                                timeout: 5000
-                            });
-                        })
-                        .catch( /*Your Error handling if the Message isn't returned, sent, etc.*/ );
+                        msg1.delete({
+                            timeout: 5000
+                        });
+                    });
 
                     msg.delete({
                         timeout: 2000
                     });
 
-                }
-            } else {
-                msg.channel.send("Vous n'êtes pas dans la liste des membres").then(msg1 => {
+                } else {
+                    msg.channel.send("Vous n'êtes pas dans la liste des membres").then(msg1 => {
                         msg1.delete({
                             timeout: 5000
                         });
-                    })
-                    .catch( /*Your Error handling if the Message isn't returned, sent, etc.*/ );
+                    });
+
+                    msg.delete({
+                        timeout: 5000
+                    });
+                }
+            } else {
+                msg.channel.send("Veuillez réessayer.").then(msg1 => {
+                    msg1.delete({
+                        timeout: 5000
+                    });
+                });
 
                 msg.delete({
                     timeout: 5000
@@ -82,8 +89,9 @@ client.on('message', msg => {
                 if (message[1] in dataID) {
                     if (dataID[message[1]][0] == userID) {
 
-                        let server = client.guilds.cache.get(serverID);
-                        var role = server.roles.cache.find(role => role.name === "Membre");
+                        let server = client.guilds.cache.get(config.discord.serverID);
+
+                        var role = server.roles.cache.find(role => role.name === config.discord.role);
 
                         server.members.cache.get(msg.author.id).roles.add(role);
 
@@ -96,23 +104,31 @@ client.on('message', msg => {
                         });
 
                         msg.channel.send("Membre confirmé").then(msg1 => {
-                                msg1.delete({
-                                    timeout: 5000
-                                });
-                            })
-                            .catch( /*Your Error handling if the Message isn't returned, sent, etc.*/ );
+                            msg1.delete({
+                                timeout: 5000
+                            });
+                        });
+
+                        msg.delete({
+                            timeout: 5000
+                        });
+                    } else {
+                        msg.channel.send("Mauvais compte Discord.").then(msg1 => {
+                            msg1.delete({
+                                timeout: 5000
+                            });
+                        });
 
                         msg.delete({
                             timeout: 5000
                         });
                     }
                 } else {
-                    msg.channel.send("Mauvais code d'accès").then(msg1 => {
-                            msg1.delete({
-                                timeout: 5000
-                            });
-                        })
-                        .catch( /*Your Error handling if the Message isn't returned, sent, etc.*/ );
+                    msg.channel.send("Mauvais code d'accès.").then(msg1 => {
+                        msg1.delete({
+                            timeout: 5000
+                        });
+                    });
 
                     msg.delete({
                         timeout: 5000
@@ -126,12 +142,9 @@ client.on('message', msg => {
             break;
 
         case "bruh":
-            // msg.channel.send("ses vraies");
-            msg.delete({
-                timeout: 500
-            });
+            msg.channel.send("ses vraies");
             break;
     }
 });
 
-client.login(token);
+client.login(config.discord.token);
